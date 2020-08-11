@@ -46,7 +46,7 @@
                   <el-option
                     v-for="(item,index) in projectInfoList"
                     :key="index"
-                    :label="item.mainPath+'.'+item.packageName+'.'+item.moduleName"
+                    :label="getLabel(item.mainPath,item.packageName,item.moduleName)"
                     :value="item.id"
                   ></el-option>
                 </el-select>
@@ -79,9 +79,10 @@
         >
           <el-table-column type="selection" prop="tableName" width="60" fixed="left"></el-table-column>
           <el-table-column prop="tableName" label="表名"></el-table-column>
-          <el-table-column prop="tableComment" label="表备注"></el-table-column>
-          <el-table-column prop="engine" label="存储引擎"></el-table-column>
-          <el-table-column prop="createTime" label="创建时间"></el-table-column>
+          <el-table-column prop="comments" label="表备注"></el-table-column>
+          <el-table-column label="字段数量">
+            <template slot-scope="scope">{{scope.row.columns.length}}</template>
+          </el-table-column>
         </el-table>
         <el-col :span="24" class="el-table_footertoolbar">
           <el-pagination
@@ -171,18 +172,30 @@ export default {
       this.form.pageSize = this.pageSize;
       if (!this.form.pollName || this.form.pollName == "master") {
         Message({
-          message: "请选择非master的数据源",
+          message: "请选择非master的数据源!",
           type: "warning",
           duration: 1 * 1000,
         });
         return false;
       }
       findGeneratorTableList(this.form).then((res) => {
-        this.tableData = res.data.list;
-        this.total = res.data.total;
+        this.tableData = res.data;
+        this.total = res.data.length;
       });
     },
-
+    getLabel(mainPath, packageName, moduleName) {
+      var label = "";
+      if (mainPath) {
+        label += mainPath;
+      }
+      if (packageName) {
+        label += "." + packageName;
+      }
+      if (moduleName) {
+        label += "." + moduleName;
+      }
+      return label;
+    },
     handleSizeChange(size) {
       this.pageSize = size;
       this.fetchData();
